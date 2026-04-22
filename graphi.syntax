@@ -1,0 +1,13 @@
+`add point = [
+    label = {literal: anything}
+    category = {literal: anything}
+    value = {literal: anything}
+]
+
+`add point = [
+    label = {literal: anything}
+    category = {literal: anything}
+    value = {literal: anything}
+]
+
+# we can add as many points we want

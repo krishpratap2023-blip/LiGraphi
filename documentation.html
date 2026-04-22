@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ligraphi Docs</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f1117;
+  color: #e6edf3;
+}
+
+.sidebar {
+  position: fixed;
+  width: 240px;
+  height: 100vh;
+  background: #161b22;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.sidebar h2 {
+  color: #00c3ff;
+}
+
+.sidebar a {
+  display: block;
+  color: #cdd9e9;
+  text-decoration: none;
+  margin: 10px 0;
+}
+
+.sidebar a:hover {
+  color: #00c3ff;
+}
+
+.content {
+  margin-left: 260px;
+  padding: 40px;
+}
+
+h1, h2, h3 {
+  color: #cae4eb;
+}
+
+.code {
+  background: #1e1e1e;
+  padding: 15px;
+  border-radius: 10px;
+  overflow-x: auto;
+  margin: 15px 0;
+  white-space: pre-wrap;
+}
+
+.section {
+  margin-bottom: 50px;
+}
+
+button {
+  background: #bfd1d6;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>Ligraphi</h2>
+  <a href="#intro">Introduction</a>
+  <a href="#features">Features</a>
+  <a href="#syntax">Syntax</a>
+  <a href="#examples">Examples</a>
+  <a href="#advanced">Advanced</a>
+  <a href="#future">Future</a>
+</div>
+
+<div class="content">
+
+<div id="intro" class="section">
+<h1>🚀 Ligraphi Documentation</h1>
+<p>
+Ligraphi is a powerful interactive graph builder that allows you to create, edit,
+and visualize line charts using both UI interactions and a custom code syntax.
+</p>
+</div>
+
+<div id="features" class="section">
+<h2>🔥 Features</h2>
+<ul>
+<li>Interactive line graph builder</li>
+<li>Click to add points</li>
+<li>Drag to edit values</li>
+<li>Edit labels and categories</li>
+<li>Multiple datasets</li>
+<li>Sparkline mode</li>
+<li>Code-based graph creation</li>
+<li>Export as PNG</li>
+</ul>
+</div>
+
+<div id="syntax" class="section">
+<h2>💻 Syntax Guide</h2>
+
+<p>Ligraphi uses a simple custom syntax to define graph data.</p>
+
+<div class="code">
+add point = [
+  label = {A}
+  category = {January}
+  value = {100}
+]
+</div>
+
+<h3>Fields</h3>
+<ul>
+<li><b>label</b> → internal identifier</li>
+<li><b>category</b> → X-axis label</li>
+<li><b>value</b> → Y-axis value</li>
+</ul>
+</div>
+
+<div id="examples" class="section">
+<h2>📊 Example</h2>
+
+<div class="code">
+add point = [
+  label = {Jan}
+  category = {January 2025}
+  value = {120}
+]
+
+add point = [
+  label = {Feb}
+  category = {February 2025}
+  value = {140}
+]
+</div>
+
+<p>This will generate a line graph with two data points.</p>
+</div>
+
+<div id="advanced" class="section">
+<h2>⚡ Advanced Usage</h2>
+
+<h3>Multiple Points</h3>
+<div class="code">
+add point = [
+  label = {A}
+  category = {Jan}
+  value = {50}
+]
+
+add point = [
+  label = {B}
+  category = {Feb}
+  value = {80}
+]
+
+add point = [
+  label = {C}
+  category = {Mar}
+  value = {120}
+]
+</div>
+
+<h3>Tips</h3>
+<ul>
+<li>Order matters (defines graph sequence)</li>
+<li>Values should be numeric</li>
+<li>Categories define X-axis labels</li>
+</ul>
+</div>
+
+<div id="future" class="section">
+<h2>🚀 Future Features</h2>
+<ul>
+<li>Dataset support in syntax</li>
+<li>Color customization</li>
+<li>Delete & update commands</li>
+<li>Live data APIs</li>
+<li>Shareable graph links</li>
+</ul>
+</div>
+
+</div>
+
+</body>
+</html>

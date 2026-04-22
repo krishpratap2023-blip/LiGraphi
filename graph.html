@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LiGraphi</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.0.0"></script>
+
+<style>
+body {
+  font-family: Arial;
+  margin: 0;
+  background: #0b0f14; /* almost black, slightly blue */
+  color: #c9d1d9; /* muted light gray */
+}
+
+.container {
+  padding: 20px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+input, button, select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #1f2933;
+  background: #11161c;
+  color: #c9d1d9;
+}
+
+input::placeholder {
+  color: #6b7280;
+}
+
+button {
+  cursor: pointer;
+  background: #1f2a36; /* muted blue-gray */
+  color: #c9d1d9;
+  transition: 0.15s ease;
+}
+
+button:hover {
+  background: #263241;
+}
+
+canvas {
+  background: #070b10; /* deeper, subtle separation */
+  border-radius: 10px;
+}
+
+.light {
+  background: #f3f4f6;
+  color: #1f2933;
+}
+
+.light canvas {
+  background: #e5e7eb;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.tab {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid #1f2933;
+  cursor: pointer;
+  background: #11161c;
+  color: #9aa4af;
+  transition: 0.15s ease;
+}
+
+.tab:hover {
+  background: #1a222c;
+}
+
+.tab.active {
+  background: #1f2a36;
+  color: #e6edf3;
+}
+
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h2>LiGraphi</h2>
+
+<div class="controls">
+  <input id="labels" placeholder="Labels (e.g. Jan,Feb,Mar)">
+  <input id="data" placeholder="Data (e.g. 10,20,30)">
+  
+  <input id="singleLabel" placeholder="Category (e.g. April)">
+  <input id="singleValue" placeholder="Value (e.g. 45)">
+  <button onclick="addPointManually()">Add Point</button>
+
+  <select id="mode">
+    <option value="line">Line</option>
+    <option value="spark">Sparkline</option>
+  </select>
+
+  <button onclick="updateChart()">Update</button>
+  <button onclick="addDataset()">Add Dataset</button>
+  <button onclick="toggleGrid()">Grid</button>
+  <button onclick="toggleTheme()">Theme</button>
+  <button onclick="download()">Download PNG</button>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('graph')">Graph</button>
+  <button class="tab" onclick="switchTab('code')">Code</button>
+</div>
+
+<div id="graphTab">
+  <!-- your existing controls + canvas stay here -->
+</div>
+
+<div id="codeTab" style="display:none;">
+  <h3>💻 Code Editor</h3>
+  <textarea id="codeArea" placeholder="Your syntax will go here..." style="width:100%; height:300px; border-radius:10px; padding:10px;"></textarea>
+  <button onclick="runCode()">Run Code</button>
+</div>
+
+<canvas id="chart" height="100"></canvas>
+
+</div>
+
+<script>
+let labels = ["A","B","C"];
+let datasets = [{
+  label: "Dataset 1",
+  data: [10,20,30],
+  borderColor: "cyan",
+  tension: 0.4,
+  pointRadius: 6,
+  dragData: true
+}];
+
+const ctx = document.getElementById("chart").getContext("2d");
+
+function switchTab(tab) {
+  const graphTab = document.getElementById("graphTab");
+  const codeTab = document.getElementById("codeTab");
+
+  const tabs = document.querySelectorAll(".tab");
+
+  // remove active from all buttons
+  tabs.forEach(t => t.classList.remove("active"));
+
+  if (tab === "graph") {
+    graphTab.style.display = "block";
+    codeTab.style.display = "none";
+    tabs[0].classList.add("active");
+  } else {
+    graphTab.style.display = "none";
+    codeTab.style.display = "block";
+    tabs[1].classList.add("active");
+  }
+}
+
+let chart = new Chart(ctx, {
+  type: "line",
+  data: { labels, datasets },
+  options: {
+    responsive: true,
+
+    plugins: {
+      legend: { display: true },
+
+      dragData: {
+        round: 1,
+        onDragEnd: function(e, datasetIndex, index, value) {
+          datasets[datasetIndex].data[index] = value;
+          chart.update();
+        }
+      }
+    },
+
+    scales: {
+      x: { grid: { display: true }},
+      y: { grid: { display: true }}
+    },
+
+    // 🔥 CLICK TO EDIT POINT
+    onClick: function(evt) {
+      const points = chart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+
+      if (points.length) {
+        const i = points[0].index;
+
+        let newLabel = prompt("Edit Category:", labels[i]);
+        let newValue = prompt("Edit Value:", datasets[0].data[i]);
+
+        if (newLabel !== null) labels[i] = newLabel;
+        if (newValue !== null && !isNaN(newValue)) {
+          datasets[0].data[i] = Number(newValue);
+        }
+
+        chart.update();
+      }
+    }
+  }
+});
+
+function runCode() {
+  const code = document.getElementById("codeArea").value;
+
+  // reset graph
+  labels.length = 0;
+  datasets[0].data = [];
+
+  // match all "add point" blocks
+  const blocks = code.match(/add point\s*=\s*\[(.*?)\]/gs);
+
+  if (!blocks) return alert("No valid syntax found");
+
+  blocks.forEach(block => {
+    const labelMatch = block.match(/label\s*=\s*\{(.*?)\}/);
+    const categoryMatch = block.match(/category\s*=\s*\{(.*?)\}/);
+    const valueMatch = block.match(/value\s*=\s*\{(.*?)\}/);
+
+    const label = labelMatch ? labelMatch[1].trim() : "Point";
+    const category = categoryMatch ? categoryMatch[1].trim() : label;
+    const value = valueMatch ? Number(valueMatch[1].trim()) : 0;
+
+    labels.push(category);
+    datasets[0].data.push(value);
+  });
+
+  chart.update();
+}
+
+// 🔥 DOUBLE CLICK = FAST EDIT
+document.getElementById("chart").ondblclick = function(evt) {
+  const points = chart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+
+  if (points.length) {
+    const i = points[0].index;
+
+    let newValue = prompt("Quick Edit Value:", datasets[0].data[i]);
+
+    if (newValue !== null && !isNaN(newValue)) {
+      datasets[0].data[i] = Number(newValue);
+      chart.update();
+    }
+  }
+};
+
+// ➕ Add new point manually
+function addPointManually() {
+  const label = document.getElementById("singleLabel").value;
+  const value = Number(document.getElementById("singleValue").value);
+
+  if (!label || isNaN(value)) return alert("Enter valid data");
+
+  labels.push(label);
+  datasets[0].data.push(value);
+
+  chart.update();
+}
+
+// ➕ Add dataset
+function addDataset() {
+  const color = '#' + Math.floor(Math.random()*16777215).toString(16);
+
+  datasets.push({
+    label: "Dataset " + (datasets.length + 1),
+    data: [...datasets[0].data],
+    borderColor: color,
+    tension: 0.4,
+    pointRadius: 6,
+    dragData: true
+  });
+
+  chart.data.datasets = datasets;
+  chart.update();
+}
+</script>
+
+</body>
+</html>
